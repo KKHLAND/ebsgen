@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EBS수능특강 영어 해설지 생성기</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <style>
+:root {
+    --primary-color: #4F46E5;
+    --primary-hover-color: #4338CA;
+    --primary-glow: rgba(79, 70, 229, 0.2);
+    --background-color: #F8FAFB;
+    --background-gradient: linear-gradient(135deg, #F8FAFB 0%, #F3F4F6 100%);
+    --panel-background-color: rgba(255, 255, 255, 0.95);
+    --panel-elevated-color: rgba(255, 255, 255, 1);
+    --border-color: rgba(200, 210, 230, 0.4);
+    --border-glow: rgba(79, 70, 229, 0.15);
+    --text-color: #1F2937;
+    --text-light-color: #6B7280;
+    --text-dim-color: #9CA3AF;
+    --error-color: #EF4444;
+    --error-glow: rgba(239, 68, 68, 0.15);
+    --success-color: #10B981;
+    --warning-color: #F59E0B;
+    --font-family: 'Noto Sans KR', sans-serif;
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(79, 70, 229, 0.08);
+    --shadow-color: rgba(0, 0, 0, 0.06);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    background: var(--background-gradient);
+    background-attachment: fixed;
+    color: var(--text-color);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.app-wrapper {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: none;
+    min-height: 100vh;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.app-header {
+    text-align: center;
+    background: linear-gradient(135deg, #061E44 0%, #2B6CB0 100%);
+    color: white;
+    padding: 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.app-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+    animation: pulse 8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.app-header h1 {
+    font-size: 2.5rem;
+    color: white;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.5),
+                 0 2px 10px rgba(0, 0, 0, 0.3);
+    font-weight: 700;
+}
+
+.app-header p {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.95);
+    position: relative;
+    z-index: 1;
+    margin-top: 0.5rem;
+}
+
+.app-container {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 1.5rem;
+    width: 100%;
+    padding: 1.5rem;
+    flex-grow: 1;
+}
+
+.controls-panel, .preview-panel {
+    background: var(--panel-elevated-color);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                0 0 0 1px var(--border-color),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.controls-panel {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.preview-panel {
+    animation: fadeInUp 1s ease-out;
+}
+
+.controls-panel h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.75rem;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.upload-section {
+    margin-bottom: 1.5rem;
+}
+
+.upload-section h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(0, 212, 255, 0.02);
+}
+
+.drop-zone:hover:not(.disabled) {
+    border-color: var(--primary-color);
+    background: rgba(0, 212, 255, 0.05);
+}
+
+.drop-zone.drag-over {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: var(--primary-color);
+    transform: scale(1.02);
+}
+
+.drop-zone.disabled {
+    cursor: not-allowed;
+    background: #E5E7EB;
+    border-color: var(--text-dim-color);
+}
+
+.drop-zone.disabled p {
+    color: var(--text-dim-color);
+}
+
+.drop-zone p {
+    color: var(--text-light-color);
+    font-size: 0.85rem;
+}
+
+.drop-zone .browse-link {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.file-preview {
+    margin-top: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.loader {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem 0;
+    color: var(--text-light-color);
+    text-align: center;
+}
+
+.loader-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.spinner {
+    border: 3px solid rgba(0, 212, 255, 0.1);
+    border-left-color: var(--primary-color);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.error-message {
+    background: linear-gradient(135deg, rgba(255, 71, 87, 0.15) 0%, rgba(255, 71, 87, 0.05) 100%);
+    color: #ff6b7a;
+    border: 1px solid rgba(255, 71, 87, 0.3);
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: left;
+    margin: 1rem 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.9rem;
+}
+
+.options-section {
+    margin-top: 1.5rem;
+}
+
+.options-section .option-item {
+    margin-bottom: 1rem;
+}
+
+.options-section .option-item small {
+    font-size: 0.75rem;
+    color: var(--text-light-color);
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.options-section label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: 0.95rem;
+}
+
+select, button, input[type="text"] {
+    width: 100%;
+    padding: 0.6rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    font-family: var(--font-family);
+    font-size: 0.95rem;
+    background: #FFFFFF;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+select:focus, input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+select {
+    cursor: pointer;
+}
+
+select option {
+    background: #F3F4F6;
+    color: var(--text-color);
+    padding: 0.5rem;
+}
+
+select option:checked {
+    background: var(--primary-glow);
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+#question-select {
+    height: 180px;
+}
+
+#target-unit-select {
+    height: 180px;
+    overflow-y: auto;
+}
+
+/* Selected Tags Styles */
+.selected-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+}
+
+.selected-tag {
+    background: var(--primary-glow);
+    color: var(--primary-hover-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid rgba(79, 70, 229, 0.3);
+}
+
+button {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.action-buttons {
+    margin: 1.5rem 0;
+}
+
+button.btn-secondary {
+    background: #F0F4FF;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+button.btn-secondary:hover:not(:disabled) {
+    background: #E0E7FF;
+    border-color: var(--primary-color);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    background: #D1D5DB;
+    color: var(--text-dim-color);
+    border-color: var(--text-dim-color);
+    transform: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #4F46E5 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px var(--primary-glow);
+}
+
+.btn-primary:hover:not(:disabled) {
+    box-shadow: 0 6px 15px var(--primary-glow);
+}
+
+.btn-stop {
+    background: #6c757d;
+    color: white;
+    width: auto;
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+}
+
+.btn-stop:hover {
+    background: #5a6268;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.preview-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #F9FAFB;
+    padding: 2rem;
+}
+
+.preview-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    color: var(--text-light-color);
+    text-align: center;
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+/* Analysis Sheet Styles */
+.analysis-sheet {
+    background-color: white;
+    width: 210mm;
+    height: 297mm;
+    padding: 12mm;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    font-size: 9pt;
+    line-height: 1.5;
+    color: black;
+    margin-bottom: 2rem;
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.preview-header .title {
+    font-weight: 700;
+    font-size: 1.2em;
+}
+
+.preview-header .unit-title {
+    font-weight: 700;
+    font-size: 1em;
+    color: #444;
+    margin-left: 10px;
+}
+
+.preview-header .info {
+    font-weight: 500;
+    font-size: 1em;
+}
+
+.preview-body {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.25rem;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.question-number {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+    color: #007bff;
+}
+
+.question-text-container {
+    font-size: 11.5pt;
+    line-height: 1.7;
+    text-align: justify;
+}
+
+.question-text-container.question-text-container-41-42 {
+    line-height: 1.35;
+    font-size: 11pt;
+}
+
+.question-text-container.question-text-container-40 {
+    line-height: 1.4;
+}
+
+.question-prompt {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.question-passage, .question-after-box {
+    margin-bottom: 1rem;
+    text-align: justify;
+    text-justify: inter-word;
+    word-wrap: break-word;
+}
+
+.answer-blank {
+    display: inline-block;
+    border-bottom: 1.2px solid black;
+    vertical-align: -0.2em;
+    margin: 0 0.1em;
+    max-width: 20ch;
+}
+.answer-blank-text {
+    visibility: hidden;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.starred-vocabulary-container {
+    display: block;
+    width: 100%;
+}
+
+.starred-vocabulary {
+    font-size: 8.5pt;
+    text-align: right;
+    margin: 1rem 0;
+    font-family: inherit;
+}
+
+.question-choices {
+    margin-bottom: 1rem;
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.question-choices li {
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5em;
+}
+
+.choices-layout-36-37 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem 1rem;
+}
+
+.choices-layout-36-37 li:nth-child(5) {
+    grid-column: 1 / 3;
+}
+
+.choice-header-40 {
+    display: grid;
+    grid-template-columns: 2em 1fr auto 1fr;
+    gap: 0 0.5em;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.choice-header-40 span:first-child {
+    grid-column: 2;
+    text-align: left;
+}
+.choice-header-40 span:last-child {
+    grid-column: 4;
+    text-align: left;
+}
+
+.question-choices li.choice-item-40 {
+    display: grid;
+    grid-template-columns: 2em 1fr auto 1fr;
+    gap: 0 0.5em;
+    align-items: center;
+    text-indent: 0;
+    padding-left: 0;
+}
+
+.choice-item-40 .choice-part-a { grid-column: 2; text-align: left; }
+.choice-item-40 .choice-dots { grid-column: 3; text-align: center; }
+.choice-item-40 .choice-part-b { grid-column: 4; text-align: left; }
+
+.boxed-text {
+    border: 1px solid #333;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    word-wrap: break-word;
+    text-align: justify;
+}
+
+.summary-arrow {
+    text-align: center;
+    font-size: 1.5rem;
+    margin: 0.1rem 0;
+    color: #555;
+    line-height: 1.1;
+}
+
+.boxed-text.summary-box {
+    margin-top: 0.2rem;
+    padding: 0.75rem;
+}
+
+.summary-blank {
+    display: inline-block;
+    font-weight: bold;
+    border-bottom: 1.2px solid black;
+    min-width: 110px;
+    text-align: center;
+    margin: 0 0.2em;
+    vertical-align: -0.2em;
+}
+
+.sequence-paragraph {
+    margin-bottom: 0.5rem;
+    text-indent: -2em;
+    padding-left: 2em;
+    text-align: justify;
+}
+
+.sub-questions-container {
+    margin-top: 0.75rem;
+    border-top: 1px solid #eee;
+    padding-top: 0.75rem;
+}
+
+.sub-question {
+    margin-bottom: 0.5rem;
+}
+
+.sub-question + .sub-question {
+    margin-top: 0.75rem;
+}
+
+/* Specifically for unit 19 layout to save vertical space */
+.question-text-container-41-42 .question-passage {
+    margin-bottom: 0.1rem; /* Extremely tight margin for long passage */
+}
+
+.question-text-container-41-42 .sub-questions-container {
+    margin-top: 0.1rem;
+    padding-top: 0.2rem;
+}
+
+.question-text-container-41-42 .question-prompt {
+    margin-bottom: 0.1rem;
+}
+
+.question-text-container-41-42 .sub-question {
+    margin-bottom: 0.15rem;
+}
+
+.question-text-container-41-42 .sub-question + .sub-question {
+    margin-top: 0.3rem;
+}
+
+.question-text-container-41-42 .question-choices li {
+    margin-bottom: 0.05rem;
+}
+
+.question-text-container-41-42 .starred-vocabulary {
+    margin: 0.2rem 0;
+}
+
+.question-choices.choices-horizontal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+}
+
+.vocabulary-block {
+    margin-top: 1rem;
+    font-size: 9.5pt;
+    text-align: left;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.vocabulary-block h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    border-top: 1px solid #eee;
+    padding-top: 1rem;
+}
+
+.vocabulary-block ul {
+    list-style-type: none;
+    padding-left: 1.5em;
+    line-height: 1.15;
+    overflow-y: hidden;
+    margin-bottom: 1.5rem; /* Ensure there is physical space at the bottom */
+}
+
+.vocabulary-block li {
+    margin-bottom: 0;
+    text-indent: -1.5em;
+}
+
+.vocabulary-block li::before {
+    content: '';
+    display: inline-block;
+    width: 0.8em;
+    height: 0.8em;
+    border: 1px solid #555;
+    background-color: white;
+    margin-right: 0.7em;
+    vertical-align: middle;
+    transform: translateY(-1px);
+}
+
+.analysis-content {
+    font-size: 0.85em;
+    color: #333;
+    border-left: 1px solid #eee;
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.analysis-content h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.answer-text {
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: #007bff;
+}
+
+.answer-group {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.explanation-block {
+    line-height: 1.5;
+    word-wrap: break-word;
+    text-align: justify;
+    white-space: pre-line;
+}
+
+.grammar-correction {
+    margin-top: 0.75rem;
+    font-weight: 500;
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+}
+
+.custom-underline {
+    text-decoration: underline;
+    text-decoration-color: black;
+    text-decoration-thickness: 1.2px;
+    text-underline-offset: 2px;
+}
+
+.red-underline {
+    border-bottom: 2px solid #E53E3E;
+    color: inherit;
+}
+
+.strikethrough {
+    text-decoration: line-through;
+    text-decoration-color: #E53E3E;
+    text-decoration-thickness: 2px;
+}
+
+.preview-footer {
+    margin-top: auto;
+    padding-top: 0.75rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 40px;
+    border-top: 2px solid #007bff;
+}
+
+.preview-footer img {
+    height: 25px;
+    width: auto;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #preview-content, #preview-content * {
+        visibility: visible;
+    }
+    #preview-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+    .analysis-sheet {
+        box-shadow: none;
+        margin: 0;
+        page-break-after: always;
+    }
+}
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script type="text/babel">
+        // Initialize pdf.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const { useState, useRef, useEffect, useMemo } = React;
+        const { createRoot } = ReactDOM;
+        const { jsPDF } = window.jspdf;
+
+        // Hardcoded fallback list of EBS units
+        const DEFAULT_EBS_UNITS = [
+            "01. 글의 목적 파악", "02. 심경 변화 파악", "03. 함축적 의미 파악", "04. 요지 파악", "05. 주장 파악",
+            "06. 주제 파악", "07. 제목 파악", "08. 도표 정보 파악", "09. 내용 일치·불일치(설명문)", "10. 내용 일치·불일치(실용문)",
+            "11. 어법 정확성 파악", "12. 어휘 적절성 파악", "13. 빈칸 내용 추론 (1)", "14. 빈칸 내용 추론 (2)",
+            "15. 흐름에 무관한 문장 찾기", "16. 문단 내 글의 순서 파악", "17. 문단 속에 문장 넣기", "18. 문단 요약",
+            "19. 장문 독해 (1)", "20. 장문 독해 (2)", "21. 철학, 종교, 역사, 풍습, 지리", "22. 환경, 자원, 재활용",
+            "23. 물리, 화학, 생명과학, 지구과학", "24. 스포츠, 레저, 취미, 여행", "25. 교육, 학교, 진로",
+            "26. 언어, 문학, 예술", "27. 컴퓨터, 인터넷, 정보, 미디어, 교통", "28. 심리, 대인 관계",
+            "29. 정치, 경제, 사회, 법", "30. 의학, 건강, 영양, 식품", "Test 1", "Test 2", "Test 3"
+        ];
+
+        const fileToBase64 = (file) =>
+            new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+            });
+
+        const fileToArrayBuffer = (file) => 
+            new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+                reader.readAsArrayBuffer(file);
+            });
+
+        const extractUnitsFromPDF = async (file) => {
+            try {
+                const arrayBuffer = await fileToArrayBuffer(file);
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const numPages = pdf.numPages;
+                const units = new Set();
+                
+                // Strategy 1: Scan TOC pages (2-9)
+                const tocEnd = Math.min(numPages, 9);
+                for (let i = 2; i <= tocEnd; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    textContent.items.forEach(item => {
+                        const str = item.str.trim();
+                        if (/^(\d{2}[\.]?|Test\s\d+|Part\s[IVX]+)\s+([가-힣a-zA-Z\s·,\(\)]+)/.test(str)) {
+                             let cleanStr = str.replace(/\s*[\.\d]+$/, '').trim(); 
+                             if (cleanStr.length > 4 && cleanStr.length < 60 && !cleanStr.includes('.....')) {
+                                 if (/^\d{2}\s/.test(cleanStr)) {
+                                     cleanStr = cleanStr.replace(/^(\d{2})\s/, '$1. ');
+                                 }
+                                 units.add(cleanStr); 
+                             }
+                        }
+                    });
+                }
+
+                // Strategy 2: Scan odd page footers
+                const scanLimit = Math.min(numPages, 100);
+                for (let i = 9; i <= scanLimit; i += 2) { 
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const items = textContent.items;
+                    if (items.length > 0) {
+                        const lastItems = items.slice(-8); 
+                        lastItems.forEach(item => {
+                            const str = item.str.trim();
+                            if (/^\d{2}[\.]?\s+[가-힣a-zA-Z\s]+$/.test(str) && str.length > 5 && str.length < 40) {
+                                let cleanStr = str;
+                                if (/^\d{2}\s/.test(cleanStr)) {
+                                     cleanStr = cleanStr.replace(/^(\d{2})\s/, '$1. ');
+                                }
+                                units.add(cleanStr);
+                            }
+                        });
+                    }
+                }
+
+                if (units.size === 0) return DEFAULT_EBS_UNITS;
+
+                return Array.from(units).sort((a, b) => {
+                    const getNum = (s) => {
+                        const match = s.match(/^(\d+)/);
+                        return match ? parseInt(match[1]) : 999;
+                    };
+                    if (a.startsWith('Test')) return 1;
+                    if (b.startsWith('Test')) return -1;
+                    return getNum(a) - getNum(b);
+                });
+
+            } catch (error) {
+                console.error("Error extracting units:", error);
+                return DEFAULT_EBS_UNITS;
+            }
+        };
+
+        const DropZone = ({ onFileDrop, file, title, disabled = false }) => {
+            const [isDragOver, setIsDragOver] = useState(false);
+            const inputRef = useRef(null);
+            
+            const handleDragOver = (e) => { e.preventDefault(); if (!disabled) setIsDragOver(true); };
+            const handleDragLeave = (e) => { e.preventDefault(); setIsDragOver(false); };
+            const handleDrop = (e) => { e.preventDefault(); if (disabled) return; setIsDragOver(false); if (e.dataTransfer.files?.[0]) onFileDrop(e.dataTransfer.files[0]); };
+            const handleFileChange = (e) => { if (e.target.files?.[0]) onFileDrop(e.target.files[0]); };
+            const handleClick = () => { if (!disabled && inputRef.current) inputRef.current.click(); };
+            const fileURL = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
+            useEffect(() => () => { if (fileURL) URL.revokeObjectURL(fileURL); }, [fileURL]);
+
+            return (
+                <div className="upload-section">
+                    <h3>{title}</h3>
+                    <div
+                        className={`drop-zone ${isDragOver ? 'drag-over' : ''} ${disabled ? 'disabled' : ''}`}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        onClick={handleClick}
+                    >
+                        <input type="file" ref={inputRef} onChange={handleFileChange} accept=".pdf,image/*" style={{display: 'none'}} disabled={disabled} />
+                        <p>{file ? `${file.name} (클릭하여 변경)` : <><span className="browse-link">파일을 선택</span>하거나 여기에 드래그하세요.</>}</p>
+                    </div>
+                    {file && (
+                         <div className="file-preview">
+                            {file.type === 'application/pdf' ? (
+                                <embed src={fileURL || ''} type="application/pdf" width="100%" height="400px" />
+                            ) : (
+                                <img src={fileURL || ''} alt="preview" className="image-preview" />
+                            )}
+                         </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Helper: Clean choice text (remove duplicated numbers like ①, (1), 1.)
+        const cleanChoiceText = (text) => {
+            if (!text) return "";
+            return text.replace(/^[\s\u2460-\u2473\(\)\d]+\.?\s*/, '');
+        };
+
+        // Helper: Extract exercise number (e.g. "01-08" -> "08", "01-Gateway" -> "Gateway")
+        const getExerciseNumber = (fullStr) => {
+            if (!fullStr) return "";
+            if (fullStr.includes('-')) return fullStr.split('-')[1];
+            return fullStr;
+        };
+        
+        // Helper: Clean prompt text (remove leading numbers/dots)
+        const cleanPrompt = (text) => {
+            if (!text) return "";
+            return text.replace(/^[\d\.\s]+/, '');
+        };
+
+        const getQuestionType = (data) => {
+            const title = data.unitTitle || "";
+            const qNum = data.questionNumber || "";
+            
+            if (title.includes("장문") || title.includes("19") || qNum === '41-42') return '41-42';
+            if (title.includes("요약") || title.includes("18") || qNum === '40') return '40';
+            if (title.includes("순서") || title.includes("16") || ['36', '37'].includes(qNum)) return '36-37';
+            if (title.includes("문장 넣기") || title.includes("삽입") || title.includes("17") || ['38', '39'].includes(qNum)) return '38-39';
+            if (title.includes("무관한") || title.includes("15") || qNum === '35') return '35';
+            if (title.includes("어법") || title.includes("11") || ['29', '30'].includes(qNum)) return '29';
+            if (title.includes("빈칸") || title.includes("13") || title.includes("14") || ['31', '32', '33', '34'].includes(qNum)) return 'blank';
+            return 'default';
+        };
+
+        const FormattedQuestion = ({ data }) => {
+            const questionType = getQuestionType(data);
+            const isSummary = questionType === '40' || (data.unitTitle && (data.unitTitle.includes('요약') || data.unitTitle.includes('18')));
+
+            const renderTextWithUnderline = (text) => {
+                if (typeof text !== 'string') return text;
+                // handle both __U__ and __UNDERLINE__ markers just in case
+                let normalized = text.replace(/__UNDERLINE__/g, '__U__');
+                if (!normalized.includes('__U__')) return normalized;
+                
+                const parts = normalized.split(/__U__(.*?)__U__/g);
+                return (
+                    <>
+                        {parts.map((part, i) => {
+                            if (i % 2 === 1) return <span className="custom-underline" key={i}>{part}</span>;
+                            // Clean up any stray markers that didn't have a pair
+                            return part.replace(/__U__/g, '');
+                        })}
+                    </>
+                );
+            };
+
+            const renderPrompt = () => {
+                if (!data.prompt) return null;
+                return <p className="question-prompt">{data.prompt}</p>;
+            };
+
+            const renderPassage = () => {
+                if (!data.passage) return null;
+                let passageContent = data.passage;
+
+                if (questionType === 'blank' && typeof passageContent === 'string') {
+                    const blankRegex = /(_{5,})/;
+                    if (blankRegex.test(passageContent)) {
+                        const answerIndex = ['①', '②', '③', '④', '⑤'].indexOf(data.answer);
+                        if (data.choices && answerIndex > -1 && data.choices[answerIndex]) {
+                            const answerText = cleanChoiceText(data.choices[answerIndex].text);
+                            const blankSpan = <span className="answer-blank" key="blank"><span className="answer-blank-text">{answerText}</span></span>;
+                            const parts = passageContent.split(blankRegex);
+                            passageContent = <>{parts.map((part, i) => (part.match(blankRegex) ? blankSpan : renderTextWithUnderline(part)))}</>;
+                        } else {
+                            passageContent = renderTextWithUnderline(passageContent);
+                        }
+                    } else {
+                        passageContent = renderTextWithUnderline(passageContent);
+                    }
+                } 
+                else if (questionType === '29' && typeof passageContent === 'string') {
+                    const regex = /((?:①|②|③|④|⑤)\s*__U__.*?__U__)/g;
+                    const parts = passageContent.split(regex);
+                    const subRegex = /(①|②|③|④|⑤)\s*__U__(.*?)__U__/;
+                    passageContent = (
+                        <>
+                            {parts.map((part, index) => {
+                                const match = part.match(subRegex);
+                                if (match) {
+                                    return <React.Fragment key={index}>{match[1]} <span className="custom-underline">{renderTextWithUnderline(match[2])}</span></React.Fragment>;
+                                }
+                                return renderTextWithUnderline(part);
+                            })}
+                        </>
+                    );
+                }
+                else if (questionType === '35' && typeof passageContent === 'string') {
+                    const parts = passageContent.split(/(__S[1-5]__)/g);
+                    const markers = ['①', '②', '③', '④', '⑤'];
+                    passageContent = (
+                        <>
+                            {parts.map((part, index) => {
+                                const match = part.match(/__S(\d)__/);
+                                if (match) {
+                                    const digit = parseInt(match[1], 10);
+                                    if (digit >= 1 && digit <= 5) return <React.Fragment key={index}>{markers[digit - 1]}</React.Fragment>;
+                                }
+                                return renderTextWithUnderline(part);
+                            })}
+                        </>
+                    );
+                }
+                else if (questionType === '41-42' && typeof passageContent === 'string') {
+                    const regex = /(\([a-e]\)\s+)(\S+)/g;
+                    const parts = passageContent.split(regex);
+                    passageContent = (
+                        <>
+                            {parts.map((part, index) => {
+                                if (index > 0 && index % 3 === 2) { 
+                                    return <span className="custom-underline" key={index}>{renderTextWithUnderline(part)}</span>;
+                                }
+                                return renderTextWithUnderline(part);
+                            })}
+                        </>
+                    );
+                }
+                else if (typeof passageContent === 'string') {
+                    passageContent = renderTextWithUnderline(passageContent);
+                }
+
+                return <div className="question-passage">{passageContent}</div>;
+            };
+
+            const renderStarredVocabulary = () => {
+                if (!data.starredVocabulary) return null;
+                if (typeof data.starredVocabulary === 'string') {
+                     const vocabWithStars = data.starredVocabulary.split('\n').map((line, index) => `${'*'.repeat(index + 1)} ${line.trim()}`).join('\n');
+                     return <pre className="starred-vocabulary">{vocabWithStars}</pre>;
+                }
+                return null;
+            };
+
+            const renderMainTextAfterBox = () => {
+                if (!data.mainTextAfterBox || questionType === 'blank') return null;
+                let text = data.mainTextAfterBox;
+                if (questionType === '36-37') {
+                    const parts = text.split(/(\([A-C]\))/).filter(part => part.trim() !== '');
+                    const paragraphs = [];
+                    for (let i = 0; i < parts.length; i += 2) {
+                        if (parts[i+1]) {
+                            paragraphs.push(<p key={i} className="sequence-paragraph">{parts[i]} {renderTextWithUnderline(parts[i+1].trim())}</p>);
+                        } else {
+                            paragraphs.push(<p key={i} className="sequence-paragraph">{renderTextWithUnderline(parts[i])}</p>);
+                        }
+                    }
+                    return <div className="question-after-box">{paragraphs}</div>;
+                }
+                return <div className="question-after-box">{renderTextWithUnderline(text)}</div>;
+            };
+
+            const renderSummaryBox = () => {
+                if (!data.summaryBoxText) return null;
+                let content = data.summaryBoxText;
+                
+                if (isSummary) {
+                    const parts = content.split(/(\(A\)|\(B\))/g);
+                    return (
+                        <>
+                            <div className="summary-arrow">↓</div>
+                            <div className="boxed-text summary-box">
+                                {parts.map((part, i) => {
+                                    if (part === '(A)' || part === '(B)') {
+                                        return <span key={i} className="summary-blank">{part}</span>;
+                                    }
+                                    return renderTextWithUnderline(part);
+                                })}
+                            </div>
+                        </>
+                    );
+                }
+                return <div className="boxed-text summary-box">{renderTextWithUnderline(data.summaryBoxText)}</div>;
+            };
+
+            const renderChoices = () => {
+                const unitMatch = data.unitTitle ? data.unitTitle.match(/^(\d+)/) : null;
+                const unitNum = unitMatch ? unitMatch[1] : null;
+                const hideChoices = ['11', '12', '15', '17'].includes(unitNum);
+                
+                if (hideChoices) return null;
+
+                if (!data.choices || data.choices.length === 0) return null;
+                const choiceMarkers = ['①', '②', '③', '④', '⑤'];
+                const choicesClassName = `question-choices ${questionType === '36-37' ? 'choices-layout-36-37' : ''}`;
+
+                return (
+                    <>
+                        {questionType === '40' && (
+                            <div className="choice-header-40">
+                                <span>(A)</span>
+                                <span>(B)</span>
+                            </div>
+                        )}
+                        <ul className={choicesClassName}>
+                            {data.choices.map((choice, index) => {
+                                if (!choice) return null;
+                                if (questionType === '40') {
+                                    const parts = (choice.text || '').split(/\s*\.{2,}\s*|\s{2,}/);
+                                    const partA = parts[0] || '';
+                                    const partB = parts[1] || '';
+                                    return (
+                                        <li key={index} className="choice-item-40">
+                                            <span className="choice-marker">{choiceMarkers[index]}</span>
+                                            <span className="choice-part-a">{renderTextWithUnderline(partA)}</span>
+                                            <span className="choice-dots"></span>
+                                            <span className="choice-part-b">{renderTextWithUnderline(partB)}</span>
+                                        </li>
+                                    );
+                                }
+                                return (
+                                    <li key={index}>
+                                        <span className="choice-marker">{choiceMarkers[index]}</span>
+                                        <span className="choice-text">{renderTextWithUnderline(choice.text)}</span>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </>
+                );
+            };
+
+            const containerClasses = ['question-text-container'];
+            if (questionType === '41-42') containerClasses.push('question-text-container-41-42');
+            if (questionType === '40') containerClasses.push('question-text-container-40');
+
+            if (data.subQuestions && data.subQuestions.length > 0) {
+                return (
+                    <div className={containerClasses.join(' ')}>
+                        <div className="question-passage">
+                            {data.passage && data.passage.split(/(__U__.*?__U__)/g).map((part, i) => 
+                                part.startsWith('__U__') ? <span className="custom-underline" key={i}>{part.replace(/__U__/g, '')}</span> : part
+                            )}
+                        </div>
+                        <div className="starred-vocabulary-container">{renderStarredVocabulary()}</div>
+                        <div className="sub-questions-container">
+                            {data.subQuestions.map((subQ, idx) => {
+                                let displayNum = subQ.questionNumber;
+                                const headerNumber = getExerciseNumber(data.questionNumber);
+                                if (data.unitTitle && data.unitTitle.includes('19') && headerNumber && headerNumber.includes('~')) {
+                                    const rangeMatch = headerNumber.match(/(\d+)/);
+                                    if (rangeMatch) {
+                                        const startNum = parseInt(rangeMatch[0], 10);
+                                        displayNum = startNum + idx;
+                                    }
+                                }
+                                if (!displayNum) displayNum = idx + 1;
+
+                                return (
+                                    <div key={idx} className="sub-question">
+                                        <p className="question-prompt">{displayNum}. {cleanPrompt(subQ.prompt)}</p>
+                                        <ul className={`question-choices ${idx === 1 ? 'choices-horizontal' : ''}`}>
+                                            {subQ.choices?.map((c, i) => (
+                                                <li key={i}>
+                                                    <span className="choice-marker">{'①②③④⑤'[i]}</span>
+                                                    <span className="choice-text">{cleanChoiceText(c.text)}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className={containerClasses.join(' ')}>
+                    {renderPrompt()}
+                    {data.boxedText && <div className="boxed-text">{renderTextWithUnderline(data.boxedText)}</div>}
+                    
+                    {questionType === '36-37' ? (
+                        <>
+                            {renderMainTextAfterBox()}
+                            <div className="starred-vocabulary-container">{renderStarredVocabulary()}</div>
+                        </>
+                    ) : questionType === '38-39' ? (
+                        <>
+                            {renderPassage()}
+                            <div className="starred-vocabulary-container">{renderStarredVocabulary()}</div>
+                        </>
+                    ) : (
+                        <>
+                            {renderPassage()}
+                            <div className="starred-vocabulary-container">{renderStarredVocabulary()}</div>
+                            {renderMainTextAfterBox()}
+                        </>
+                    )}
+                    {renderSummaryBox()}
+                    {renderChoices()}
+                </div>
+            );
+        };
+
+        const AnalysisSheet = ({ title, questionData, logoDataUrl }) => {
+            const displayTitle = title.replace('문제지', '해설지');
+            const [visibleVocabCount, setVisibleVocabCount] = useState(null);
+            const vocabBlockRef = useRef(null);
+            const exerciseNum = getExerciseNumber(questionData.questionNumber);
+
+            useEffect(() => {
+                setVisibleVocabCount(null);
+            }, [questionData]);
+
+            useEffect(() => {
+                if (visibleVocabCount === null && questionData.vocabulary) {
+                    const calculateVisibleItems = () => {
+                        if (!vocabBlockRef.current) return;
+                        const container = vocabBlockRef.current;
+                        const heading = container.querySelector('h4');
+                        const list = container.querySelector('ul');
+                        const firstItem = list?.querySelector('li');
+
+                        if (!heading || !list || !firstItem) {
+                            setVisibleVocabCount(questionData.vocabulary.length);
+                            return;
+                        }
+
+                        const containerHeight = container.clientHeight;
+                        const headingTotalHeight = heading.offsetHeight + 16;
+                        const itemTotalHeight = firstItem.offsetHeight + 
+                                                parseInt(window.getComputedStyle(firstItem).marginTop || 0) + 
+                                                parseInt(window.getComputedStyle(firstItem).marginBottom || 0);
+
+                        if (itemTotalHeight > 0) {
+                            const availableListHeight = containerHeight - headingTotalHeight;
+                            const safetyMargin = (itemTotalHeight * 1.5) + 10; // Ensures ~1.5 lines of space at the bottom
+                            const maxItems = Math.floor((availableListHeight - safetyMargin) / itemTotalHeight);
+                            setVisibleVocabCount(Math.max(0, maxItems));
+                        } else {
+                            setVisibleVocabCount(questionData.vocabulary.length);
+                        }
+                    };
+                    const timerId = setTimeout(calculateVisibleItems, 150);
+                    return () => clearTimeout(timerId);
+                }
+            }, [visibleVocabCount, questionData.vocabulary]);
+
+            const renderTranslation = () => {
+                const { translation } = questionData;
+                if (!translation) return null;
+
+                const processMarkers = (text) => {
+                    if (typeof text !== 'string') return text;
+                    
+                    const regex = /(__ANSWER__|__STRIKE__|__RED_UNDERLINE__|__U__|__UNDERLINE__)(.*?)\1/g;
+                    
+                    const parts = [];
+                    let lastIndex = 0;
+                    let match;
+                    
+                    while ((match = regex.exec(text)) !== null) {
+                        if (match.index > lastIndex) {
+                            parts.push(text.slice(lastIndex, match.index));
+                        }
+                        const marker = match[1];
+                        const content = match[2];
+                        if (marker === '__STRIKE__') {
+                            parts.push(<span className="strikethrough" key={match.index}>{content}</span>);
+                        } else if (marker === '__RED_UNDERLINE__') {
+                            parts.push(<span className="red-underline" key={match.index}>{content}</span>);
+                        } else {
+                            parts.push(<span className="custom-underline" key={match.index}>{content}</span>);
+                        }
+                        lastIndex = regex.lastIndex;
+                    }
+                    
+                    if (lastIndex < text.length) {
+                        parts.push(text.slice(lastIndex));
+                    }
+                    
+                    return parts.map((part, i) => {
+                        if (typeof part === 'string') {
+                            return part.replace(/__(ANSWER|STRIKE|RED_UNDERLINE|U|UNDERLINE)__/g, '');
+                        }
+                        return part;
+                    });
+                };
+
+                return processMarkers(translation);
+            };
+
+            const headerNumber = /^\d+$/.test(exerciseNum) ? `${exerciseNum}.` : exerciseNum;
+            const vocabsToDisplay = visibleVocabCount === null && questionData.vocabulary ? questionData.vocabulary : (questionData.vocabulary || []).slice(0, visibleVocabCount);
+
+            return (
+                <div className="analysis-sheet">
+                    <div className="preview-header">
+                        <span className="title">{displayTitle}</span>
+                        <div style={{display:'flex', alignItems:'center'}}>
+                            <span className="unit-title">{questionData.unitTitle || ''}</span>
+                            <span className="info" style={{marginLeft:'20px'}}>학번 ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ) 이름 ( &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</span>
+                        </div>
+                    </div>
+                    <div className="preview-body">
+                        <div className="question-main-content">
+                            <div className="question-content">
+                                 <h2 className="question-number">{headerNumber}</h2>
+                                 <FormattedQuestion data={questionData} />
+                            </div>
+                        </div>
+                        <div className="analysis-content">
+                            <h3>해석</h3>
+                            <div className="explanation-block">{renderTranslation()}</div>
+                            
+                            {(!questionData.subQuestions || questionData.subQuestions.length === 0) && (questionData.correctedAnswer || questionData.grammarCorrection) && (
+                                <p className="grammar-correction">{questionData.grammarCorrection || questionData.correctedAnswer}</p>
+                            )}
+
+                            {questionData.subQuestions && questionData.subQuestions.length > 0 ? (
+                                <div className="answer-group">
+                                    {questionData.subQuestions.map((subQ, idx) => {
+                                        let displayNum = subQ.questionNumber;
+                                        if (questionData.unitTitle && questionData.unitTitle.includes('19') && headerNumber && headerNumber.includes('~')) {
+                                            const rangeMatch = headerNumber.match(/(\d+)/);
+                                            if (rangeMatch) {
+                                                const startNum = parseInt(rangeMatch[0], 10);
+                                                displayNum = startNum + idx;
+                                            }
+                                        }
+                                        if (!displayNum) displayNum = idx + 1;
+
+                                        return (
+                                            <div key={idx} style={{ marginBottom: '0.75rem' }}>
+                                                {idx === 1 && (questionData.correctedAnswer || questionData.grammarCorrection) && (
+                                                    <p className="grammar-correction" style={{ marginBottom: '0.5rem', marginTop: 0 }}>
+                                                        {questionData.grammarCorrection || questionData.correctedAnswer}
+                                                    </p>
+                                                )}
+                                                <p className="answer-text" style={{ margin: 0 }}>{displayNum}번 정답: {subQ.answer || '확인 필요'}</p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <p className="answer-text">{exerciseNum}번 정답: {questionData.answer}</p>
+                            )}
+
+                            <div className="vocabulary-block" ref={vocabBlockRef}>
+                                <h4>어휘 및 어구</h4>
+                                <ul>
+                                    {vocabsToDisplay.map((item, index) => (
+                                        <li key={index}>{item.word} - {item.meaning}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="preview-footer">
+                        {logoDataUrl && <img src={logoDataUrl} alt="logo" className="logo-placeholder" />}
+                    </div>
+                </div>
+            );
+        };
+
+        const sanitizeAIResponse = (data) => {
+            if (!data || typeof data !== 'object') return {};
+            Object.values(data).forEach((question) => {
+                if (!question || typeof question !== 'object') return;
+                // Basic Sanitization
+                if (Array.isArray(question.choices)) {
+                    question.choices = question.choices.filter(Boolean);
+                    question.choices.forEach(c => { if(c && typeof c.text !== 'string') c.text = JSON.stringify(c.text); });
+                }
+                if (Array.isArray(question.vocabulary)) {
+                    question.vocabulary = question.vocabulary.filter(Boolean);
+                }
+            });
+            return data;
+        }
+
+        const App = () => {
+            const [apiKey, setApiKey] = useState('AIzaSyDO3B8bq74A2zWIvknLyfUy_8_--E6UM8U');
+            const [examFile, setExamFile] = useState(null);
+            const [solutionFile, setSolutionFile] = useState(null);
+            const [logoFile, setLogoFile] = useState(null);
+            const [logoDataUrl, setLogoDataUrl] = useState(null);
+            const [isLoading, setIsLoading] = useState(false);
+            const [isProcessed, setIsProcessed] = useState(false);
+            const [selectedQuestions, setSelectedQuestions] = useState([]);
+            const [targetUnits, setTargetUnits] = useState([]);
+            const [unitList, setUnitList] = useState([]);
+            const [isExtractingUnits, setIsExtractingUnits] = useState(false);
+            const [manualUnitEntry, setManualUnitEntry] = useState(false);
+            const [manualUnitText, setManualUnitText] = useState('');
+            const [analysisData, setAnalysisData] = useState(null);
+            const [examTitle, setExamTitle] = useState('');
+            const [error, setError] = useState(null);
+            const [loadingMessage, setLoadingMessage] = useState('파일을 분석 중입니다...');
+            const previewRef = useRef(null);
+            const isCancelledRef = useRef(false);
+
+            const ebsQuestions = useMemo(() => ['Gateway', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'], []);
+
+            useEffect(() => {
+                const processUnits = async () => {
+                    if (examFile && examFile.type === 'application/pdf') {
+                        setIsExtractingUnits(true);
+                        const extracted = await extractUnitsFromPDF(examFile);
+                        setUnitList(extracted);
+                        setIsExtractingUnits(false);
+                    } else {
+                        setUnitList(DEFAULT_EBS_UNITS);
+                    }
+                };
+                processUnits();
+            }, [examFile]);
+
+            useEffect(() => {
+                if (!logoFile) { setLogoDataUrl(null); return; }
+                const reader = new FileReader();
+                reader.onloadend = () => setLogoDataUrl(reader.result);
+                reader.readAsDataURL(logoFile);
+            }, [logoFile]);
+
+            const generateAnalysis = async () => {
+                 if (!examFile) { setError("시험지 파일을 선택해주세요."); return; }
+                 
+                 const finalApiKey = apiKey || ''; 
+
+                 if (!finalApiKey) {
+                     setError("API 키가 없습니다. 설정에서 Google AI Studio 키를 입력해주세요.");
+                     return;
+                 }
+
+                 const finalTargetUnits = manualUnitEntry && manualUnitText ? [manualUnitText] : targetUnits;
+                 if (finalTargetUnits.length === 0) { setError("단원을 선택해주세요."); return; }
+
+                 setIsLoading(true);
+                 setIsProcessed(false);
+                 setError(null);
+                 setAnalysisData({});
+                 isCancelledRef.current = false;
+                 setExamTitle(examFile.name.replace(/\.[^/.]+$/, ""));
+
+                 try {
+                    const examBase64 = await fileToBase64(examFile);
+                    const examPart = { inlineData: { mimeType: examFile.type, data: examBase64 } };
+                    const solutionPart = solutionFile ? { inlineData: { mimeType: solutionFile.type, data: await fileToBase64(solutionFile) } } : null;
+
+                    const prompt = `
+You are an expert AI assistant creating English exam study materials from an EBS Textbook.
+Analyze the provided PDF documents.
+
+**Target Scope:**
+1. **Units:** Focus ONLY on these units: ${finalTargetUnits.join(', ')}.
+2. **Exercises:** Extract only exercises: ${selectedQuestions.join(', ')}. 
+   - **Important:** If 'Gateway' is NOT in the selected list, DO NOT include it.
+   - **Unit 19 Exception:** User selection '01' means Questions 01~02, '02' means 03~04, '03' means 05~06, '04' means 07~08.
+
+3. **Numbering:** Use format "UnitNumber-ExerciseNumber" (e.g., "01-Gateway", "15-02").
+   - For Unit 19, use range format: "19-01~02", "19-03~04", "19-05~06", "19-07~08".
+
+**Output Requirement (CRITICAL):**
+**YOU MUST ALWAYS EXTRACT THE QUESTION PROMPT (발문) FOR EVERY QUESTION.**
+If the text contains any underlined phrases in the original PDF, wrap them precisely with \`__U__\` markers (e.g., \`__U__cheated God__U__\`). Do not ignore underlines.
+
+**Unit Specific Formatting:**
+   - **Unit 03 (Implicit Meaning), 11 (Grammar), 12 (Vocab), 19 (Long Passage Q2):**
+     - **Passage:** Identify the target word/sentence/phrase corresponding to the answer or choices. Wrap this target in \`__U__\`.
+   - **Unit 13, 14 (Blanks):**
+     - **Passage:** Ensure the passage contains a blank line represented as "_______" where the answer goes.
+   - **Unit 15 (Flow/Irrelevant):**
+     - **Translation:** You MUST wrap the Korean translation of the irrelevant sentence in \`__STRIKE__\` markers.
+   - **Unit 16 (Sequencing):**
+     - The initial sentence/paragraph MUST be extracted into the 'boxedText' field.
+     - The text sections marked (A), (B), and (C) should be a single string in the 'mainTextAfterBox' field.
+   - **Unit 17 (Insertion):**
+     - The sentence to insert MUST go into the 'boxedText' field.
+     - The main passage with insertion points (e.g., (①), (②)) MUST go into the 'passage' field.
+     - **Translation:** You MUST wrap the Korean translation of the inserted sentence (the answer) in \`__RED_UNDERLINE__\` markers.
+   - **Unit 11, 12, 19 (2nd Question):**
+     - **Correction:** Provide the corrected word/phrase in the \`correctedAnswer\` field. (e.g. "Wrong -> Correct").
+   - **Unit 18 (Summary):**
+     - **Summary Box:** Return the summary sentence in \`summaryBoxText\`. Use "(A)" and "(B)" to mark the blanks.
+     - **Choices:** Format the choice text as "WordA ...... WordB" (use at least 6 dots as separator).
+     - **Translation:** You MUST append the Korean translation of the summary sentence to the end of the main text translation. Label it "[요약문]".
+
+**General Output Rules:**
+- Return a single JSON array.
+- For EVERY question, provide:
+  - \`questionNumber\`: String ID.
+  - \`prompt\`: The EXACT Korean question text found in the PDF. **MANDATORY FOR ALL QUESTIONS. Do not omit.**
+  - \`passage\`: Original English text with \`__U__\` or blanks if applicable. 
+  - \`translation\`: Korean translation with \`__STRIKE__\` or \`__RED_UNDERLINE__\` if applicable.
+  - \`choices\`: Array of objects { text: "..." }. You may set to null for Units 11, 12, 15, 17, but MUST provide for others.
+  - \`answer\`: Correct answer.
+  - \`vocabulary\`: Array of {word, meaning}. **EXTRACT AROUND 15 TO 20 IMPORTANT VOCABULARY ITEMS.**
+  - \`unitTitle\`: The unit name.
+  - \`correctedAnswer\`: (Optional)
+  - \`summaryBoxText\`: (Optional)
+  - \`subQuestions\`: (Optional) Array for Long Passage (Unit 19) containing sub-question objects. 
+    IMPORTANT: Each sub-question object MUST contain \`prompt\`, \`choices\`, and \`answer\`. 
+    The \`answer\` field MUST NOT be empty (e.g., "①").
+`;
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${finalApiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: prompt }, examPart, ...(solutionPart ? [solutionPart] : [])] }],
+                            generationConfig: { responseMimeType: "application/json" }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(errData.error?.message || "API Error");
+                    }
+                    const result = await response.json();
+                    if(isCancelledRef.current) return;
+
+                    const jsonText = result.candidates[0].content.parts[0].text;
+                    const parsedData = JSON.parse(jsonText);
+                    const dataMap = parsedData.reduce((acc, item) => {
+                         const key = item.unitTitle ? `${item.unitTitle}-${item.questionNumber}` : item.questionNumber;
+                         acc[key] = item;
+                         return acc;
+                    }, {});
+                    
+                    setAnalysisData(sanitizeAIResponse(dataMap));
+                    setIsProcessed(true);
+
+                 } catch (e) {
+                     setError("오류 발생: " + e.message);
+                 } finally {
+                     setIsLoading(false);
+                 }
+            };
+
+            const handleDownload = async () => {
+                if (!previewRef.current) return;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const sheets = Array.from(previewRef.current.querySelectorAll('.analysis-sheet'));
+                
+                for (let i = 0; i < sheets.length; i++) {
+                    if (i > 0) pdf.addPage();
+                    const canvas = await html2canvas(sheets[i], { scale: 2, backgroundColor: '#fff' });
+                    pdf.addImage(canvas.toDataURL('image/jpeg'), 'JPEG', 0, 0, 210, 297);
+                }
+                pdf.save(`${examTitle}_해설지.pdf`);
+            };
+
+            const sortedAnalysisData = useMemo(() => {
+                if (!analysisData) return [];
+                return Object.values(analysisData).sort((a, b) => {
+                    const getNum = (str) => {
+                         if (!str) return 999;
+                         if (str.includes('Gateway')) return -1;
+                         const m = str.match(/\d+/);
+                         return m ? parseInt(m[0]) : 999;
+                    };
+                    const unitA = getNum(a.unitTitle);
+                    const unitB = getNum(b.unitTitle);
+                    if (unitA !== unitB) return unitA - unitB;
+                    return getNum(a.questionNumber) - getNum(b.questionNumber);
+                });
+            }, [analysisData]);
+
+            return (
+                <>
+                    <div className="app-wrapper">
+                        <header className="app-header">
+                            <h1>EBS수능특강 영어 해설지 생성기</h1>
+                            <p>EBS 교재 PDF를 업로드하여 맞춤 해설지를 만들어보세요.</p>
+                        </header>
+                        <div className="app-container">
+                            <aside className="controls-panel">
+                                <h2>설정</h2>
+                                <div className="option-item" style={{marginBottom: '0.5rem'}}>
+                                    <label>API 키 (필수)</label>
+                                    <div style={{marginBottom: '5px', fontSize: '0.85em'}}>
+                                        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style={{color: 'var(--primary-color)', fontWeight: 'bold', textDecoration: 'none'}}>Google AI Studio에서 키 발급받기 &rarr;</a>
+                                    </div>
+                                    <input type="text" placeholder="AI Studio에서 발급받은 키를 입력하세요" value={apiKey} onChange={(e)=>setApiKey(e.target.value)} />
+                                </div>
+                                <DropZone onFileDrop={setExamFile} file={examFile} title="1. EBS 교재 PDF 업로드" disabled={isLoading} />
+                                <DropZone onFileDrop={setSolutionFile} file={solutionFile} title="2. 정답지 PDF 업로드 (선택)" disabled={isLoading} />
+                                <DropZone onFileDrop={setLogoFile} file={logoFile} title="3. 로고 이미지 업로드 (선택)" disabled={isLoading} />
+                                {error && <div className="error-message">{error}</div>}
+                                
+                                <div className="options-section">
+                                    <div className="option-item">
+                                        <label>4. 단원명 선택 (다중 선택 가능)</label>
+                                        {isExtractingUnits ? <div className="loader-content"><div className="spinner"></div><span>PDF 분석 중...</span></div> : (
+                                            <select id="target-unit-select" multiple value={manualUnitEntry?['manual']:targetUnits} onChange={(e)=>{
+                                                const vals = Array.from(e.target.selectedOptions, o=>o.value);
+                                                if(vals.includes('manual')) { setManualUnitEntry(true); setTargetUnits([]); }
+                                                else { setManualUnitEntry(false); setTargetUnits(vals); }
+                                            }}>
+                                                {unitList.map((u,i)=><option key={i} value={u}>{u}</option>)}
+                                                <option value="manual">직접 입력</option>
+                                            </select>
+                                        )}
+                                        {/* New Tag Display for Units */}
+                                        {!manualUnitEntry && targetUnits.length > 0 && (
+                                            <div className="selected-tags">
+                                                {targetUnits.map(unit => (
+                                                    <span key={unit} className="selected-tag">{unit}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {manualUnitEntry && <input type="text" value={manualUnitText} onChange={(e)=>setManualUnitText(e.target.value)} placeholder="단원명 직접 입력" style={{marginTop: '0.5rem'}} />}
+                                    </div>
+                                    <div className="option-item">
+                                        <label>5. 문항 선택 (다중 선택 가능)</label>
+                                        <select id="question-select" multiple value={selectedQuestions} onChange={(e)=>setSelectedQuestions(Array.from(e.target.selectedOptions,o=>o.value))}>
+                                            {ebsQuestions.map(q=><option key={q} value={q}>{q === 'Gateway' ? 'Gateway' : `Exercise ${q}`}</option>)}
+                                        </select>
+                                        {/* New Tag Display for Questions */}
+                                        {selectedQuestions.length > 0 && (
+                                            <div className="selected-tags">
+                                                {selectedQuestions.map(q => (
+                                                    <span key={q} className="selected-tag">
+                                                        {q === 'Gateway' ? 'Gateway' : `${q}번`}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="action-buttons">
+                                    <button className="btn-primary" onClick={generateAnalysis} disabled={isLoading || !examFile}>
+                                        {isLoading ? '생성 중...' : '해설지 생성'}
+                                    </button>
+                                </div>
+                                {isLoading && <button className="btn-stop" onClick={()=>{isCancelledRef.current=true;setIsLoading(false)}}>중지</button>}
+                                {isProcessed && <button className="btn-primary" onClick={handleDownload}>PDF 다운로드</button>}
+                            </aside>
+                            <main className="preview-panel">
+                                {sortedAnalysisData.length > 0 ? (
+                                    <div id="preview-content" ref={previewRef}>
+                                        {sortedAnalysisData.map((data, i) => <AnalysisSheet key={i} title={examTitle} questionData={data} logoDataUrl={logoDataUrl} />)}
+                                    </div>
+                                ) : <div className="preview-placeholder">설정을 완료하고 '해설지 생성' 버튼을 눌러주세요.</div>}
+                            </main>
+                        </div>
+                    </div>
+                    <footer className="app-footer">
+                        <p>© 2025 KH KIM. All Rights Reserved.</p>
+                    </footer>
+                </>
+            );
+        };
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
